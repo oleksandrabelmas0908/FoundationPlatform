@@ -1,0 +1,84 @@
+version: '3'
+
+services:
+
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    env_file:
+      - .env
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    
+  auth-service:
+    env_file:
+      - .env
+    build:
+      context: . 
+      dockerfile: ./backend/auth_service/Dockerfile
+    volumes:
+      - auth_service_data:/app
+      # - ./backend/shared:/app/shared
+    depends_on:
+      - postgres
+    ports:
+      - "8000:8000"
+
+
+  foundation-service:
+    env_file:
+      - .env
+    build:
+      context: . 
+      dockerfile: ./backend/foundation_service/Dockerfile
+    volumes:
+      - foundation_service_data:/app
+      # - ./backend/shared:/app/shared
+    depends_on:
+      - postgres
+    ports:
+      - "8001:8000"
+
+
+  payment-service:
+    env_file:
+      - .env
+    build:
+      context: . 
+      dockerfile: ./backend/payment_service/Dockerfile
+    volumes:
+      - payment_service_data:/app
+      # - ./backend/shared:/app/shared
+    depends_on:
+      - postgres
+    ports:
+      - "8002:8000"
+
+
+  analitic-service:
+    env_file:
+      - .env
+    build:
+      context: . 
+      dockerfile: ./backend/analitic_service/Dockerfile
+    volumes:
+      - analitic_service_data:/app
+      # - ./backend/shared:/app/shared
+    depends_on:
+      - postgres
+      - auth-service
+    ports:
+      - "8003:8000"
+
+
+volumes:
+  postgres_data:
+  auth_service_data:
+  foundation_service_data:
+  payment_service_data:
+  analitic_service_data:
+
+

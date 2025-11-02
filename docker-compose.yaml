@@ -11,6 +11,11 @@ services:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d foundation_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
     
   auth-service:
@@ -21,9 +26,9 @@ services:
       dockerfile: ./backend/auth_service/Dockerfile
     volumes:
       - auth_service_data:/app
-      # - ./backend/shared:/app/shared
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     ports:
       - "8000:8000"
 
@@ -36,7 +41,6 @@ services:
       dockerfile: ./backend/foundation_service/Dockerfile
     volumes:
       - foundation_service_data:/app
-      # - ./backend/shared:/app/shared
     depends_on:
       - postgres
     ports:
@@ -51,7 +55,6 @@ services:
       dockerfile: ./backend/payment_service/Dockerfile
     volumes:
       - payment_service_data:/app
-      # - ./backend/shared:/app/shared
     depends_on:
       - postgres
     ports:
@@ -66,7 +69,6 @@ services:
       dockerfile: ./backend/analitic_service/Dockerfile
     volumes:
       - analitic_service_data:/app
-      # - ./backend/shared:/app/shared
     depends_on:
       - postgres
       - auth-service

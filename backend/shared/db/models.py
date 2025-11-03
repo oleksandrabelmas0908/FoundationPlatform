@@ -11,7 +11,7 @@ class User(Base):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    email: Mapped[EmailStr] = mapped_column(String(50), unique=True, index=True)
+    email: Mapped[str] = mapped_column(String(50), unique=True, index=True)
     hashed_password: Mapped[str]
 
     founds: Mapped[List["Found"]] = relationship(back_populates="user", cascade="all, delete-orphan")
@@ -31,4 +31,4 @@ class Found(Base):
 
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
 
-    user: Mapped["User"] = relationship(back_populates="found")
+    user: Mapped["User"] = relationship(back_populates="founds")

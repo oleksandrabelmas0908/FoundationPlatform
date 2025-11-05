@@ -1,4 +1,5 @@
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from contextlib import asynccontextmanager
 
 from shared.core.settings import settings
 from shared.db.models import Base
@@ -25,3 +26,10 @@ async def get_db():
 async def init_tables():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+
+
+@asynccontextmanager
+async def lifespan(app):
+    await init_tables()
+    yield
+    await engine.dispose()

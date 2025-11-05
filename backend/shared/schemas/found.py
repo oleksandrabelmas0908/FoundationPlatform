@@ -1,12 +1,14 @@
 from pydantic import BaseModel
 
 
-class FoundIn(BaseModel):
+class FoundCreate(BaseModel):
     name: str
     description: str
-    goal: int
-    current: int
+    goal: float
 
+
+class FoundIn(FoundCreate):
+    current: float = 0
     user_id: int
 
 

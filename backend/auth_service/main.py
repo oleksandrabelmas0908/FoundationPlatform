@@ -1,20 +1,23 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from contextlib import asynccontextmanager
 
-from shared.db.engine import init_tables, engine
+from shared.db.engine import init_tables, engine, lifespan
 from routes import router
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    await init_tables()
-    yield
-    await engine.dispose()
 
 
 app = FastAPI(debug=True, title="Auth service", lifespan=lifespan)
 app.include_router(router)
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 if __name__ == '__main__':

@@ -25,7 +25,8 @@ async def login_db(user: UserLogin, session: AsyncSession) -> UserOut:
                 id=db_user.id,
                 email=db_user.email,
                 first_name=db_user.first_name,
-                last_name=db_user.last_name
+                last_name=db_user.last_name,
+                balance=db_user.balance
             )
         else:
             raise HTTPException(status_code=400, detail="incorrect password")
@@ -58,7 +59,8 @@ async def register_db(user: UserRegister, session: AsyncSession) -> UserOut:
                 id=db_user.id,
                 email=db_user.email,
                 first_name=db_user.first_name,
-                last_name=db_user.last_name
+                last_name=db_user.last_name,
+                balance=db_user.balance
             )
 
     except Exception as e:
@@ -75,7 +77,8 @@ async def get_user_by_id(user_id: int, session: AsyncSession) -> UserOut:
             id=db_user.id,
             email=db_user.email,
             first_name=db_user.first_name,
-            last_name=db_user.last_name
+            last_name=db_user.last_name,
+            balance=db_user.balance
         )
     except Exception as e:
         raise HTTPException(status_code=404, detail=f"{e}")

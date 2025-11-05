@@ -9,6 +9,7 @@ class UserIn(BaseModel):
 
 class UserOut(UserIn):
     id: int
+    balance: float
 
 
 class UserLogin(BaseModel):

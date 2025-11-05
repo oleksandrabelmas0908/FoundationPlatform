@@ -15,9 +15,11 @@ logger = logging.getLogger(name="AAAAAAAAAAAAAAAAAAA")
 
 @router.post("/login")
 async  def login(
+    request: Request,
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     session: AsyncSession = Depends(get_db)
 ) -> dict:
+    logger.info(request)
     user_schema = UserLogin(
         email=form_data.username,
         password=form_data.password

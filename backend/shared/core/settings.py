@@ -12,6 +12,8 @@ class Settings(BaseSettings):
 
     AUTH_URL: str
 
+    KAFKA_BOOTSTRAP_SERVERS: str
+
     class Config:
         env_file = ".env"
 

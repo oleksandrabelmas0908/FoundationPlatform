@@ -3,6 +3,7 @@ from typing import Annotated
 import logging
 
 from crud import get_user_payments, get_found_payments, create_payment_db
+from producer import send_one
 from shared.core.security import oauth2_scheme, verify_access_token
 from shared.db.engine import AsyncSession, get_db
 from shared.schemas import PaymentSchema
@@ -40,4 +41,9 @@ async def pay_to_found(
     session: AsyncSession = Depends(get_db)
 ) -> PaymentSchema:
     user_id = verify_access_token(token)
+    await send_one(topic="pay_to_found", message={
+        "user_id": user_id,
+        "amount": amount,
+        "found_id": found_id
+    })
     return await create_payment_db(session=session, user_id=user_id, found_id=found_id, amount=amount)

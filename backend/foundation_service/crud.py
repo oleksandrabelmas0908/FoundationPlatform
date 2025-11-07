@@ -4,7 +4,7 @@ from fastapi import HTTPException
 import logging
 
 from shared.schemas import FoundOut, FoundIn, FoundCreate
-from shared.db.models import Found
+from shared.db.models import Found, User
 
 
 logging.basicConfig(level=logging.INFO)
@@ -41,6 +41,7 @@ async def get_founds_db(session: AsyncSession, limit: int | None = 10) -> list[F
                 name=found.name,
                 description=found.description,
                 goal=found.goal,
+                current=found.current,
                 user_id=found.user_id
             ))
         return list_founds
@@ -155,6 +156,30 @@ async def get_user_founds_db(session: AsyncSession, user_id) -> list[FoundOut]:
                 user_id=found.user_id
             ))
         return list_founds
+
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=f"{e}")
+    
+
+async def pay_to_found(session: AsyncSession, user_id: int, found_id: int, amount: float):
+    try:
+        async with session:
+            result_user = await session.execute(
+                select(User.balance).where(User.id == user_id)
+            )
+            changed_balance = result_user.scalar_one() - amount
+            update_user = await session.execute(
+                update(User).where(User.id == user_id).values(balance=changed_balance)
+            )
+            
+            result_found = await session.execute(
+                select(Found.current).where(Found.id == found_id)
+            )
+            changed_current = result_found.scalar_one() + amount
+            update_found = await session.execute(
+                update(Found).where(Found.id == found_id).values(current=changed_current)
+            )
+            await session.commit()
 
     except Exception as e:
         raise HTTPException(status_code=404, detail=f"{e}")

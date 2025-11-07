@@ -35,7 +35,6 @@ def create_access_token(user_id: int, expires_delta: Optional[timedelta] = None)
 
 
 def verify_access_token(token: str) -> int: 
-    logger.info(type(token))
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
         user_id = payload.get("sub")

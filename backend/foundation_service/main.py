@@ -4,21 +4,25 @@ import uvicorn
 from contextlib import asynccontextmanager
 import asyncio
 import logging
+from prometheus_client import make_asgi_app
 
 from routes import router
 from shared.db.engine import lifespan
 from consumer import kafka_consumer, start_consumer
+from shared.core.logs.logger import get_logger, setup_logging
+from shared.core.logs.middleware import LoggingMiddleware, ErrorLoggingMiddleware
 
 
-logger = logging.getLogger(__name__)
+setup_logging(service_name="foundation_service")
+logger = get_logger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup
-    logger.info("Starting application...")
-    
-    # Start Kafka consumer in background
+    logger.info("=" * 50)
+    logger.info("Payment Service starting up...")
+    logger.info("=" * 50)    
+
     consumer_task = asyncio.create_task(
         start_consumer_background()
     )
@@ -42,6 +46,10 @@ async def start_consumer_background():
 
 
 app = FastAPI(debug=True, title="Foundation service", lifespan=lifespan)
+
+metrics_app = make_asgi_app()
+app.mount("/metrics", metrics_app)
+
 app.include_router(router=router)
 
 app.add_middleware(
@@ -51,6 +59,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(ErrorLoggingMiddleware)
+app.add_middleware(LoggingMiddleware)
+
+
 
 if __name__ == '__main__':
-    uvicorn.run("main:app", port=8000, log_level="info")
+    uvicorn.run("main:app", port=8000, log_config=None)

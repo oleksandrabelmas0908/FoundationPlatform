@@ -1,0 +1,33 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: "log-collector"
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: "log-collector"
+          __path__: "/var/lib/docker/containers/*/*log"
+
+    pipeline_stages:
+      - json:
+          expressions: 
+            stream: stream
+            attrs: attrs
+            tag: attrs.tag
+
+      - regex:
+          expression: "^(?s)(?P<time>\\S+?) (?P<stream>stdout|stderr) (?P<flags>\\S+?) (?P<content>.*)$" 
+          source: "tag"
+
+      - labels:
+          tag:
+          stream:
